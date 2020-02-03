@@ -3,13 +3,26 @@ const auth = require('../auth');
 
 const TABLE = 'user';
 
-module.exports = function (injectedStore) {
+module.exports = function (injectedStore, injectedCache) {
     let store = injectedStore;
+    let cache = injectedCache;
     if (!store) {
-        store = require('../../../store/mysql');
+        store = require('../../../store/dummy');
     }
 
-    function list() {
+    if (!cache) {
+        cache = require('../../../store/dummy');
+    }
+
+    async function list() {
+        let users = await cache.list(TABLE);
+        if(!users){
+            console.log('Not in cache, searching on db')
+            users = await store.list(TABLE);
+            cache.upsert(TABLE, users)
+        } else{
+            console.log('Cache data served');
+        }
         return store.list(TABLE);
     }
 
@@ -60,6 +73,6 @@ module.exports = function (injectedStore) {
         get,
         upsert,
         follow,
-        following
+        following,
     };
 }

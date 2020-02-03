@@ -25,6 +25,7 @@ function list(req, res, next) {
 }
 
 function get(req, res, next) {
+    console.log('hola2');
     Controller.get(req.params.id)
         .then((user) => {
             response.success(req, res, user, 200);
